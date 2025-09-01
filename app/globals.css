@@ -19,6 +19,107 @@
   }
 }
 
+/* Dark mode styles */
+.dark {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+}
+
+.dark body {
+  background: #0a0a0a;
+  color: #ededed;
+}
+
+.dark .bg-white\/80 {
+  background-color: rgba(17, 24, 39, 0.8);
+}
+
+.dark .bg-gray-900\/80 {
+  background-color: rgba(17, 24, 39, 0.8);
+}
+
+.dark .border-gray-200\/50 {
+  border-color: rgba(55, 65, 81, 0.5);
+}
+
+.dark .border-gray-700\/50 {
+  border-color: rgba(55, 65, 81, 0.5);
+}
+
+.dark .text-gray-600 {
+  color: #d1d5db;
+}
+
+.dark .text-gray-300 {
+  color: #d1d5db;
+}
+
+.dark .text-gray-700 {
+  color: #d1d5db;
+}
+
+.dark .text-gray-200 {
+  color: #d1d5db;
+}
+
+.dark .bg-white\/50 {
+  background-color: rgba(55, 65, 81, 0.5);
+}
+
+.dark .bg-gray-800\/50 {
+  background-color: rgba(55, 65, 81, 0.5);
+}
+
+.dark .border-gray-700 {
+  border-color: #374151;
+}
+
+.dark .hover\:border-blue-600:hover {
+  border-color: #2563eb;
+}
+
+/* Custom animations */
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 3s linear infinite;
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(-25%);
+    animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+  }
+  50% {
+    transform: translateY(0);
+    animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+  }
+}
+
+.animate-bounce {
+  animation: bounce 1s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: .5;
+  }
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);

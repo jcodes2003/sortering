@@ -6,22 +6,47 @@ export default function Header() {
   const [isHovered, setIsHovered] = useState(false);
 
   useEffect(() => {
-    // initialize theme from localStorage or prefers-color-scheme
-    const saved = typeof window !== "undefined" && localStorage.getItem("theme");
-    if (saved) {
-      setTheme(saved);
-      document.documentElement.classList.toggle("dark", saved === "dark");
-    } else if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
-      setTheme("dark");
-      document.documentElement.classList.add("dark");
+    // Check if we're in the browser environment
+    if (typeof window !== "undefined") {
+      // Get saved theme from localStorage
+      const savedTheme = localStorage.getItem("theme");
+      
+      if (savedTheme) {
+        setTheme(savedTheme);
+        // Apply the saved theme
+        if (savedTheme === "dark") {
+          document.documentElement.classList.add("dark");
+        } else {
+          document.documentElement.classList.remove("dark");
+        }
+      } else {
+        // Check system preference
+        const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        const initialTheme = prefersDark ? "dark" : "light";
+        setTheme(initialTheme);
+        
+        if (initialTheme === "dark") {
+          document.documentElement.classList.add("dark");
+        }
+      }
     }
   }, []);
 
-  const toggle = () => {
-    const next = theme === "dark" ? "light" : "dark";
-    setTheme(next);
-    document.documentElement.classList.toggle("dark", next === "dark");
-    localStorage.setItem("theme", next);
+  const toggleTheme = () => {
+    const newTheme = theme === "dark" ? "light" : "dark";
+    setTheme(newTheme);
+    
+    // Update localStorage
+    localStorage.setItem("theme", newTheme);
+    
+    // Update DOM classes
+    if (newTheme === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+    
+    console.log("Theme changed to:", newTheme); // Debug log
   };
 
   return (
@@ -46,7 +71,7 @@ export default function Header() {
 
       <div className="flex items-center gap-4">
         <button
-          onClick={toggle}
+          onClick={toggleTheme}
           aria-label="Toggle theme"
           title="Toggle light / dark"
           className="flex items-center gap-3 px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-300 hover:shadow-lg hover:scale-105 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm"

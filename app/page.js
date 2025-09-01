@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import * as XLSX from "xlsx";
+import Header from "../components/Header";
 import FileInput from "../components/FileInput";
 import SelectSection from "../components/SelectSection";
 import ExportButton from "../components/ExportButton";
@@ -154,6 +155,7 @@ export default function ExcelUploader() {
 
     return (
         <div className="p-4">
+            <Header />
             <div className="flex gap-4 items-center mb-4">
                 <FileInput onFileChange={handleFileUpload} />
                 {data.length > 0 && (
