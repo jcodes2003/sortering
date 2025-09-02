@@ -97,9 +97,41 @@ export default function ExcelUploader() {
         )}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
     };
 
+    // Extract full name from file data
+    const getFullNameFromData = (row) => {
+        // Look for common name field variations in the data
+        const firstName = row["First Name"] ?? row["FirstName"] ?? row["first name"] ?? row["firstname"] ?? row["First Name"] ?? "";
+        const lastName = row["Last Name"] ?? row["LastName"] ?? row["last name"] ?? row["lastname"] ?? row["Last Name"] ?? "";
+        const fullName = row["Full Name"] ?? row["FullName"] ?? row["full name"] ?? row["fullname"] ?? row["Name"] ?? row["name"] ?? "";
+        
+        // If we have a full name field, use it
+        if (fullName && fullName.trim() !== "") {
+            return fullName.trim();
+        }
+        
+        // If we have both first and last name, combine them
+        if (firstName && lastName && firstName.trim() !== "" && lastName.trim() !== "") {
+            return `${firstName.trim()} ${lastName.trim()}`;
+        }
+        
+        // If we only have first name
+        if (firstName && firstName.trim() !== "") {
+            return `${firstName.trim()} N/A`;
+        }
+        
+        // If we only have last name
+        if (lastName && lastName.trim() !== "") {
+            return `N/A ${lastName.trim()}`;
+        }
+        
+        // If no name data found
+        return "N/A";
+    };
+
     // Only keep requested fields for display/export (Timestamp formatted)
     const projectedData = filteredData.map((row) => ({
         Timestamp: formatTimestamp(row.Timestamp ?? row.timestamp ?? row.Time ?? row.time ?? ""),
+        Name: getFullNameFromData(row),
         "Email Address": row["Email Address"] ?? row.Email ?? row.email ?? "",
         Score: row.Score ?? row.score ?? "",
         Section: (row.Section ?? row.Class ?? row.section ?? row.SectionName) ?? "",

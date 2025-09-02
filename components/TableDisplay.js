@@ -3,6 +3,7 @@ import React from "react";
 
 const COLUMNS = [
     "Timestamp",
+    "Name",
     "Email Address",
     "Score",
     "Section",
