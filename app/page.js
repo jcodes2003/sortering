@@ -8,6 +8,7 @@ import ExportButton from "../components/ExportButton";
 import TableDisplay from "../components/TableDisplay";
 
 
+
 export default function ExcelUploader() {
     const [data, setData] = useState([]);
     const [uniqueSections, setUniqueSections] = useState([]);
@@ -38,29 +39,7 @@ export default function ExcelUploader() {
         reader.readAsBinaryString(file);
     };
 
-    // Attendance roster state
-    const [roster, setRoster] = useState([]);
-    const [absentees, setAbsentees] = useState([]);
 
-    const handleRosterUpload = (event) => {
-        const file = event.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            const binaryStr = e.target.result;
-            const workbook = XLSX.read(binaryStr, { type: "binary" });
-            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-            const jsonData = XLSX.utils.sheet_to_json(firstSheet, { defval: "" });
-            // Normalize roster to { surname, email, section }
-            const normalized = jsonData.map((r) => ({
-                surname: (r.Surname ?? r.surname ?? r.LastName ?? "").toString().trim().toLowerCase(),
-                email: (r["Email Address"] ?? r.Email ?? r.email ?? "").toString().trim().toLowerCase(),
-                section: (r.Section ?? r.Class ?? r.section ?? r.SectionName ?? "").toString().trim(),
-            }));
-            setRoster(normalized);
-        };
-        reader.readAsBinaryString(file);
-    };
 
     const exportToExcel = (sectionData) => {
         const ws = XLSX.utils.json_to_sheet(sectionData);
@@ -137,53 +116,31 @@ export default function ExcelUploader() {
         Section: (row.Section ?? row.Class ?? row.section ?? row.SectionName) ?? "",
     }));
 
-    // Extract surname from email local-part. Example: albe.cabasa.coc@... -> surname = 'cabasa'
-    const getSurnameFromEmail = (email) => {
-        if (!email || typeof email !== "string") return "";
-        const local = email.split("@")[0] || "";
-        const parts = local.split(".").map((p) => p.trim()).filter(Boolean);
-        // Prefer the second token (index 1) as surname if present, otherwise use last token
-        if (parts.length >= 2) return parts[1];
-        if (parts.length === 1) return parts[0];
-        return "";
+    // Extract surname/last name from full name
+    const getSurnameFromName = (fullName) => {
+        if (!fullName || typeof fullName !== "string") return "";
+        const nameParts = fullName.trim().split(/\s+/);
+        // Return the last part as surname
+        return nameParts[nameParts.length - 1] || "";
     };
 
-    // Sort projected data by surname (A-Z), fallback to full email
+    // Sort projected data by surname/last name (A-Z)
     const projectedDataSorted = projectedData.slice().sort((a, b) => {
-        const sa = String(getSurnameFromEmail(a["Email Address"]) || "").toLowerCase();
-        const sb = String(getSurnameFromEmail(b["Email Address"]) || "").toLowerCase();
-        if (sa < sb) return -1;
-        if (sa > sb) return 1;
-        // tiebreak by full email address
-        const ea = String(a["Email Address"] || "").toLowerCase();
-        const eb = String(b["Email Address"] || "").toLowerCase();
-        if (ea < eb) return -1;
-        if (ea > eb) return 1;
+        const surnameA = getSurnameFromName(a.Name || "").toLowerCase();
+        const surnameB = getSurnameFromName(b.Name || "").toLowerCase();
+        if (surnameA < surnameB) return -1;
+        if (surnameA > surnameB) return 1;
+        // If surnames are the same, sort by full name as tiebreaker
+        const nameA = String(a.Name || "").toLowerCase();
+        const nameB = String(b.Name || "").toLowerCase();
+        if (nameA < nameB) return -1;
+        if (nameA > nameB) return 1;
         return 0;
     });
 
-    // Compute absentees by comparing roster surnames to submitted surnames within selected section
-    const computeAbsentees = () => {
-        if (!roster || roster.length === 0) return setAbsentees([]);
-        // Build set of surnames from projectedDataSorted for the selected section
-        const submittedSurnames = new Set(
-            projectedDataSorted.map((r) => getSurnameFromEmail(r["Email Address"]).toLowerCase()).filter(Boolean)
-        );
 
-        const abs = roster
-            .filter((r) => (selectedSection === "all" ? true : r.section === selectedSection))
-            .filter((r) => !submittedSurnames.has(r.surname))
-            .map((r) => ({ surname: r.surname, email: r.email, section: r.section }));
 
-        setAbsentees(abs);
-    };
 
-    const exportAbsentees = () => {
-        const ws = XLSX.utils.json_to_sheet(absentees.map(a => ({ Surname: a.surname, Email: a.email, Section: a.section })));
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Absentees");
-        XLSX.writeFile(wb, `${selectedSection}_absentees.xlsx`);
-    };
 
     return (
         <div className="p-4">
@@ -197,6 +154,20 @@ export default function ExcelUploader() {
                     </>
                 )}
             </div>
+            
+            {/* Summary Statistics */}
+            {data.length > 0 && (
+                <div className="mb-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                    <h2 className="text-xl font-bold text-gray-800 mb-3">Summary Statistics</h2>
+                    <div className="flex justify-center">
+                        <div className="p-4 bg-white border border-gray-300 rounded-lg">
+                            <h3 className="text-lg font-semibold text-blue-600">Total Students</h3>
+                            <p className="text-3xl font-bold text-blue-800">{projectedDataSorted.length}</p>
+                        </div>
+                    </div>
+                </div>
+            )}
+            
             <TableDisplay data={projectedDataSorted} />
         </div>
     );

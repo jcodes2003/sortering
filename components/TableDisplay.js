@@ -10,30 +10,39 @@ const COLUMNS = [
 ];
 
 export default function TableDisplay({ data }) {
+    const studentCount = data.length;
+    
     return (
-        <table className="min-w-full border border-gray-300">
-            <thead>
-                <tr>
-                    {COLUMNS.map((col, idx) => (
-                        <th key={`h-${idx}-${col}`} className="border px-4 py-2">
-                            {col}
-                        </th>
-                    ))}
-                </tr>
-            </thead>
-            <tbody>
-                {data.map((row, rowIndex) => (
-                    <tr key={`row-${rowIndex}`}>
-                        {COLUMNS.map((col, colIndex) => (
-                            <td key={`cell-${rowIndex}-${colIndex}-${col}`} className="border px-4 py-2">
-                                {((row[col] ?? row[col.replace(/ /g, "")]) === "" || row[col] == null)
-                                    ? "Not yet filled by the student"
-                                    : (row[col] ?? row[col.replace(/ /g, "")])}
-                            </td>
+        <div>
+            <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <h3 className="text-lg font-semibold text-blue-800">
+                    Total Students: {studentCount}
+                </h3>
+            </div>
+            <table className="min-w-full border border-gray-300">
+                <thead>
+                    <tr>
+                        {COLUMNS.map((col, idx) => (
+                            <th key={`h-${idx}-${col}`} className="border px-4 py-2">
+                                {col}
+                            </th>
                         ))}
                     </tr>
-                ))}
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    {data.map((row, rowIndex) => (
+                        <tr key={`row-${rowIndex}`}>
+                            {COLUMNS.map((col, colIndex) => (
+                                <td key={`cell-${rowIndex}-${colIndex}-${col}`} className="border px-4 py-2">
+                                    {((row[col] ?? row[col.replace(/ /g, "")]) === "" || row[col] == null)
+                                        ? "Not yet filled by the student"
+                                        : (row[col] ?? row[col.replace(/ /g, "")])}
+                                </td>
+                            ))}
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
     );
 }
